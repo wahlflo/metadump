@@ -1,0 +1,6 @@
+argparse     
+PyPDF2       
+python-xmp-toolkit  
+Pillow             
+zipfile36
+lxml
