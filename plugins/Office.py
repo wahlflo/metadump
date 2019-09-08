@@ -1,6 +1,5 @@
 import zipfile
 import lxml.etree
-import sys
 
 
 KEY_TO_CATEGORIES = dict()
@@ -21,29 +20,29 @@ class Office_Analyser:
         return 'Office'
 
     def extract_metadata(self, path_to_file: str) -> dict:
-        metadata = self._extract_metadata(path_to_file=path_to_file)
-        metadata = self._enrich_with_categories(metadata=metadata)
+        metadata = self.__extract_metadata(path_to_file=path_to_file)
+        metadata = self.__enrich_with_categories(metadata=metadata)
         return metadata
     
-    def _enrich_with_categories(self, metadata: dict) -> dict:
+    def __enrich_with_categories(self, metadata: dict) -> dict:
         enriched_metadata = list()
         for key, value, describtion in metadata:
             category, vlevel = KEY_TO_CATEGORIES.get(key, (list(), 3))
             enriched_metadata.append((key, value, describtion, category, vlevel))
         return enriched_metadata
 
-    def _extract_metadata(self, path_to_file):
+    def __extract_metadata(self, path_to_file):
         if zipfile.is_zipfile(path_to_file):
             try:
                 zip_file = zipfile.ZipFile(path_to_file)
             except zipfile.BadZipFile:
                 return list()
-            meta_data_from_core = self._meta_data_from_core(zip_file=zip_file)
-            meta_data_from_app = self._meta_data_from_app(zip_file=zip_file)
+            meta_data_from_core = self.__meta_data_from_core(zip_file=zip_file)
+            meta_data_from_app = self.__meta_data_from_app(zip_file=zip_file)
             return meta_data_from_core + meta_data_from_app
         return list()
 
-    def _meta_data_from_core(self, zip_file):
+    def __meta_data_from_core(self, zip_file):
         meta_data = list()
         try:
             meta_data_as_xml = lxml.etree.fromstring(zip_file.read('docProps/core.xml'))    
@@ -55,11 +54,11 @@ class Office_Analyser:
                 text = ''
             else:
                 text = child.text
-            tag = Office_Analyser._get_purified_tag(child)
+            tag = Office_Analyser.__get_purified_tag(child)
             meta_data.append((tag, text, 'Microsoft Office - docProps/core.xml'))
         return meta_data
 
-    def _meta_data_from_app(self, zip_file):
+    def __meta_data_from_app(self, zip_file):
         meta_data = list()
         try:
             meta_data_as_xml = lxml.etree.fromstring(zip_file.read('docProps/app.xml'))    
@@ -71,12 +70,12 @@ class Office_Analyser:
                 text = ''
             else:
                 text = child.text
-            tag = Office_Analyser._get_purified_tag(child)
+            tag = Office_Analyser.__get_purified_tag(child)
             meta_data.append((tag, text, 'Microsoft Office - docProps/app.xml'))
         return meta_data
 
     @staticmethod
-    def _get_purified_tag(element):
+    def __get_purified_tag(element):
         tag = element.tag
         tag = tag.replace('{' + str(element.nsmap[element.prefix]) + '}', '')
         return tag  

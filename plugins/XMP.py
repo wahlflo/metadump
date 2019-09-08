@@ -1,9 +1,5 @@
 import os
-import sys
-
-# Does not work on windows machine
-if os.name != 'nt':
-    from libxmp.utils import file_to_dict
+from libxmp.utils import file_to_dict       # Does not work on windows machine
 
 
 KEY_TO_CATEGORIES = dict()
@@ -64,18 +60,18 @@ class XMP_Analyser:
     def extract_metadata(self, path_to_file: str) -> dict:
         if os.name == 'nt':  
             return list()
-        metadata = self._extract_metadata(path_to_file=path_to_file)
-        metadata = self._enrich_with_categories(metadata=metadata)
+        metadata = self.__extract_metadata(path_to_file=path_to_file)
+        metadata = self.__enrich_with_categories(metadata=metadata)
         return metadata
     
-    def _enrich_with_categories(self, metadata: dict) -> dict:
+    def __enrich_with_categories(self, metadata: dict) -> dict:
         enriched_metadata = list()
         for key, value, describtion in metadata:
             category, vlevel = KEY_TO_CATEGORIES.get(key, (list(), 3))
             enriched_metadata.append((key, value, describtion, category, vlevel))
         return enriched_metadata
 
-    def _extract_metadata(self, path_to_file):
+    def __extract_metadata(self, path_to_file):
         try:
             xmp_meta_data = file_to_dict(path_to_file)
             meta_data_entries = list()

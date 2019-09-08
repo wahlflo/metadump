@@ -76,7 +76,7 @@ class VAction(argparse.Action):
         setattr(args, self.dest, self.values)
 
 
-def _filter_for_category(metadata, categories: list):
+def __filter_for_category(metadata, categories: list):
     filtered_metadata = list()
     for key, value, description, category, vlevel in metadata:
         filter_passed = False
@@ -89,7 +89,7 @@ def _filter_for_category(metadata, categories: list):
     return filtered_metadata
 
 
-def _parse_date_string(date_string):
+def __parse_date_string(date_string):
     datetime_formats = ['%Y:%m:%d %H:%M:%S', '%Y-%m-%dT%H:%M:%S', '%Y-%m-%dT%H:%M:%SZ']
     for datetime_format in datetime_formats:
         try:
@@ -99,9 +99,9 @@ def _parse_date_string(date_string):
     return None
 
 
-def _convert_gps_specification(gps_coordinate: str):
-    reference_direction = _extract_gps_reference_direction(gps_coordinate=gps_coordinate)
-    if reference_direction == None:
+def __convert_gps_specification(gps_coordinate: str):
+    reference_direction = __extract_gps_reference_direction(gps_coordinate=gps_coordinate)
+    if reference_direction is None:
         print('reference_direction')
         return None
     gps_coordinate = gps_coordinate.replace(reference_direction, '').strip()
@@ -118,11 +118,11 @@ def _convert_gps_specification(gps_coordinate: str):
         try:
             gps_coordinate = float(gps_coordinate)
         except:
-            None    
-    return  gps_coordinate, reference_direction
+            return None
+    return gps_coordinate, reference_direction
     
 
-def _extract_gps_reference_direction(gps_coordinate: str):
+def __extract_gps_reference_direction(gps_coordinate: str):
     directions = ['N', 'E', 'W', 'S']
     for direction in directions:
         if direction in gps_coordinate:
@@ -131,7 +131,7 @@ def _extract_gps_reference_direction(gps_coordinate: str):
 
 ######################################################################################
 # load plugins dynamically
-def _load_plugins():
+def __load_plugins():
     path_to_plugins = os.path.dirname(os.path.realpath(__file__)) + os.sep + 'plugins'
     plugin_files = list()
     for file_path in os.listdir(path_to_plugins):
@@ -146,7 +146,7 @@ def _load_plugins():
         plugins.append(module.ANALYSER())
     return plugins
 
-PLUGINS = _load_plugins()
+PLUGINS = __load_plugins()
 
 
 ######################################################################################
@@ -166,9 +166,9 @@ def extract_metadata_of_file(path_to_file, specified_plugins=None):
 
 
 def get_creation_date(metadata: list):
-    filtered_metadata = _filter_for_category(metadata=metadata, categories=['creation_time'])
+    filtered_metadata = __filter_for_category(metadata=metadata, categories=['creation_time'])
     metadata_values = [x[1] for x in filtered_metadata]
-    parsed_dates = [_parse_date_string(x) for x in metadata_values]
+    parsed_dates = [__parse_date_string(x) for x in metadata_values]
     parsed_dates = [x for x in parsed_dates if x is not None]
     if len(parsed_dates) == 0:
         return None    
@@ -176,9 +176,9 @@ def get_creation_date(metadata: list):
 
 
 def get_modify_date(metadata: list):
-    filtered_metadata = _filter_for_category(metadata=metadata, categories=['modify_time'])
+    filtered_metadata = __filter_for_category(metadata=metadata, categories=['modify_time'])
     metadata_values = [x[1] for x in filtered_metadata]
-    parsed_dates = [_parse_date_string(x) for x in metadata_values]
+    parsed_dates = [__parse_date_string(x) for x in metadata_values]
     parsed_dates = [x for x in parsed_dates if x is not None]
     if len(parsed_dates) == 0:
         return None    
@@ -186,12 +186,12 @@ def get_modify_date(metadata: list):
 
 
 def get_GPS_coordinates(metadata: list):
-    latitude_filtered = _filter_for_category(metadata=metadata, categories=['position_latitude'])
-    longitude_filtered = _filter_for_category(metadata=metadata, categories=['position_longitude'])
+    latitude_filtered = __filter_for_category(metadata=metadata, categories=['position_latitude'])
+    longitude_filtered = __filter_for_category(metadata=metadata, categories=['position_longitude'])
     latitude_values = [x[1] for x in latitude_filtered if x[1] != '']
     longitude_values = [x[1] for x in longitude_filtered if x[1] != '']
-    converted_lat = [_convert_gps_specification(x) for x in latitude_values]
-    converted_lon = [_convert_gps_specification(x) for x in longitude_values]
+    converted_lat = [__convert_gps_specification(x) for x in latitude_values]
+    converted_lon = [__convert_gps_specification(x) for x in longitude_values]
     converted_lat = [x for x in converted_lat if x is not None]
     converted_lon = [x for x in converted_lon if x is not None]
     if len(converted_lat) == 0 or len(converted_lon) == 0:
@@ -202,7 +202,7 @@ def get_GPS_coordinates(metadata: list):
 
 
 def get_author_name(metadata: list):
-    filtered_metadata = _filter_for_category(metadata=metadata, categories=['author_name'])
+    filtered_metadata = __filter_for_category(metadata=metadata, categories=['author_name'])
     metadata_values = [x[1] for x in filtered_metadata if x[1] != '']
     if len(metadata_values) == 0:
         return None
@@ -211,7 +211,7 @@ def get_author_name(metadata: list):
 
 ######################################################################################
 # main program
-def _progress_bar(iteration, total, prefix='', suffix='', decimals=1, length=70):
+def __progress_bar(iteration, total, prefix='', suffix='', decimals=1, length=70):
     if UNICODE_SUPPORT:
         fill = '█'
     else:
@@ -225,19 +225,19 @@ def _progress_bar(iteration, total, prefix='', suffix='', decimals=1, length=70)
         print()
 
 
-def _extract_metadata_of_list_of_files(file_paths: list, path_to_input, arguments):
+def __extract_metadata_of_list_of_files(file_paths: list, path_to_input, arguments):
     extracted = list()
     total_number_of_files = len(file_paths)
-    _progress_bar(iteration=0, total=total_number_of_files, prefix='Analysing Files:', suffix='', decimals=2)
+    __progress_bar(iteration=0, total=total_number_of_files, prefix='Analysing Files:', suffix='', decimals=2)
     for index, path_to_file in enumerate(file_paths):
         metadata = extract_metadata_of_file(path_to_file=path_to_file, specified_plugins=arguments.plugins)
         extracted.append((path_to_file, metadata))
-        _progress_bar(iteration=index+1, total=total_number_of_files, prefix='Analysing Files:', suffix='', decimals=2)
+        __progress_bar(iteration=index+1, total=total_number_of_files, prefix='Analysing Files:', suffix='', decimals=2)
     print()
     return extracted
 
 
-def _preprocess_extracted_metadata(arguments, metadata):
+def __preprocess_extracted_metadata(arguments, metadata):
     # filter verbosity level 
     filtered_metadata = list()
     for key, value, description, category, vlevel in metadata:
@@ -252,7 +252,7 @@ def _preprocess_extracted_metadata(arguments, metadata):
 
     # applies filter
     if arguments.filter != None:
-        metadata = _filter_for_category(metadata=metadata, categories=arguments.filter)
+        metadata = __filter_for_category(metadata=metadata, categories=arguments.filter)
 
     # applies value length limit 
     if arguments.limit is not None:
@@ -261,7 +261,7 @@ def _preprocess_extracted_metadata(arguments, metadata):
     return metadata
 
 
-def _display_result(arguments, metadata_of_files, path_to_input, display_part_of_stream=False):
+def __display_result(arguments, metadata_of_files, path_to_input, display_part_of_stream=False):
     # filter empty files
     if not arguments.showemptyfiles: 
         metadata_of_files = [(file_path, metadata) for file_path, metadata in metadata_of_files if len(metadata) > 0]
@@ -308,14 +308,14 @@ def _display_result(arguments, metadata_of_files, path_to_input, display_part_of
                     continue
                 print('\tCATEGORY: {0}'.format(cat.upper()))
 
-                _print_meta_data(key_max=key_max, value_max=value_max, description_max=description_max, indentation=2, metadata=data, arguments=arguments)
+                __print_meta_data(key_max=key_max, value_max=value_max, description_max=description_max, indentation=2, metadata=data, arguments=arguments)
                 print()
         else:
-            _print_meta_data(key_max=key_max, value_max=value_max, description_max=description_max, indentation=1, metadata=metadata, arguments=arguments)
+            __print_meta_data(key_max=key_max, value_max=value_max, description_max=description_max, indentation=1, metadata=metadata, arguments=arguments)
             print()
         
 
-def _print_meta_data(key_max, value_max, description_max, indentation, metadata, arguments):
+def __print_meta_data(key_max, value_max, description_max, indentation, metadata, arguments):
     spacing = 3
     print()
     if arguments.printcategories:
@@ -409,15 +409,15 @@ if __name__ == '__main__':
                 extract_metadata = extract_metadata_of_file(path_to_file=path_to_file, specified_plugins=arguments.plugins)
                 metadata_of_files = [(path_to_file, extract_metadata)]
                 # preprocess the extracted metadata
-                metadata_of_files = [ (path_to_file, _preprocess_extracted_metadata(arguments=arguments, metadata=metadata)) for path_to_file, metadata in metadata_of_files]
+                metadata_of_files = [ (path_to_file, __preprocess_extracted_metadata(arguments=arguments, metadata=metadata)) for path_to_file, metadata in metadata_of_files]
                 # display metadata
-                _display_result(arguments, metadata_of_files=metadata_of_files, path_to_input=path_to_input, display_part_of_stream=True)
+                __display_result(arguments, metadata_of_files=metadata_of_files, path_to_input=path_to_input, display_part_of_stream=True)
         else:
-            metadata_of_files = _extract_metadata_of_list_of_files(file_paths=input_list, path_to_input=path_to_input, arguments=arguments)
+            metadata_of_files = __extract_metadata_of_list_of_files(file_paths=input_list, path_to_input=path_to_input, arguments=arguments)
             # preprocess the extracted metadata
-            metadata_of_files = [ (path_to_file, _preprocess_extracted_metadata(arguments=arguments, metadata=metadata)) for path_to_file, metadata in metadata_of_files]
+            metadata_of_files = [ (path_to_file, __preprocess_extracted_metadata(arguments=arguments, metadata=metadata)) for path_to_file, metadata in metadata_of_files]
             # display metadata
-            _display_result(arguments, metadata_of_files=metadata_of_files, path_to_input=path_to_input)
+            __display_result(arguments, metadata_of_files=metadata_of_files, path_to_input=path_to_input)
     except KeyboardInterrupt:
         print()
         print('Keyboard Interrupt: Stopping search')

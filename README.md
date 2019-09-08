@@ -7,7 +7,7 @@ Metadump is a command line utility which extracts and displays embedded metadata
 * Extracting and displaying metadata of various types of files such as:
     - EXIF
     - PDF
-    - XMP (currently works only on a linux machine)
+    - XMP
     - Microsoft Office-Documents: Word, Excel, Powerpoint  (documents in the format before 2007 are not supported)
 * Filtering of the extracted metadata
 * Easy expandability for other types of files
@@ -21,6 +21,8 @@ These instructions will get you a copy of the project up and running Metadump on
 2. Clone the project or download it as .zip and extract it
 
 3. Install the dependencies of the project by typing `pip3 install -r requirements.txt`.
+
+4. Install Exempi for extracting XMP metadata with your default packet manager: e.g. with pacman: `pacman -S exempi`
 
 Now Metadump is ready for use.
 
