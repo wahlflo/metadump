@@ -48,7 +48,7 @@ class Exif_Analyser:
         metadata = self.__extract_metadata(path_to_file=path_to_file)
         metadata = self.__enrich_with_GPS_Information(metadata=metadata)
         metadata = [(key, metadata[key][0], metadata[key][1]) for key in metadata]
-        metadata = self._enrich_with_categories(metadata=metadata)
+        metadata = self.__enrich_with_categories(metadata=metadata)
         return metadata
     
     def __enrich_with_categories(self, metadata: dict) -> dict:
