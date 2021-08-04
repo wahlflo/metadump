@@ -35,11 +35,11 @@ class Office_Analyser:
         if zipfile.is_zipfile(path_to_file):
             try:
                 zip_file = zipfile.ZipFile(path_to_file)
+                meta_data_from_core = self.__meta_data_from_core(zip_file=zip_file)
+                meta_data_from_app = self.__meta_data_from_app(zip_file=zip_file)
+                return meta_data_from_core + meta_data_from_app
             except zipfile.BadZipFile:
                 return list()
-            meta_data_from_core = self.__meta_data_from_core(zip_file=zip_file)
-            meta_data_from_app = self.__meta_data_from_app(zip_file=zip_file)
-            return meta_data_from_core + meta_data_from_app
         return list()
 
     def __meta_data_from_core(self, zip_file):

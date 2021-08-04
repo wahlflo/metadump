@@ -93,9 +93,11 @@ class Exif_Analyser:
             for key, value in gps_info.items():
                 metadata['GPSInfo:{0}'.format(key)] = (value, 'extracted from EXIF GPSInfo metadata')
             if self.__gps_info_contains_GPS_position(decoded_gps_info=gps_info):
-                lat, lat_ref, lon, lon_ref = self.__decode_GPS_position(decoded_gps_info=gps_info)
-                metadata['GPSInfo => Latitude'] = ('{0} {1}'.format(lat, lat_ref), 'extracted from EXIF GPSInfo metadata')
-                metadata['GPSInfo => Longitude'] = ('{0} {1}'.format(lon, lon_ref), 'extracted from EXIF GPSInfo metadata')
+                extracted_position = self.__decode_GPS_position(decoded_gps_info=gps_info)
+                if extracted_position is not None:
+                    lat, lat_ref, lon, lon_ref = extracted_position
+                    metadata['GPSInfo => Latitude'] = ('{0} {1}'.format(lat, lat_ref), 'extracted from EXIF GPSInfo metadata')
+                    metadata['GPSInfo => Longitude'] = ('{0} {1}'.format(lon, lon_ref), 'extracted from EXIF GPSInfo metadata')
             if self.__gps_info_contains_altitude(decoded_gps_info=gps_info):
                 altitude, alt_ref = self.__decode_GPS_altitude(decoded_gps_info=gps_info)
                 metadata['GPSInfo => Altitude'] = ('{0} meter'.format(altitude), 'extracted from EXIF GPSInfo metadata')
@@ -126,7 +128,7 @@ class Exif_Analyser:
         return 'GPSAltitude' in decoded_gps_info and 'GPSAltitudeRef' in decoded_gps_info 
 
     def __decode_GPS_altitude(self, decoded_gps_info: dict):
-        altitude = float(decoded_gps_info['GPSAltitude'][0]) / float(decoded_gps_info['GPSAltitude'][1])
+        altitude = float(decoded_gps_info['GPSAltitude'])
         if decoded_gps_info['GPSAltitudeRef'] == b'\x00':
             alt_ref = 'Above sea level'
             modifier = 1
